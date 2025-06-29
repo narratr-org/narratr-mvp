@@ -1,0 +1,32 @@
+# $DOG 전용 테마 태그 규칙
+- name: BitcoinEco
+  type: theme
+  keywords: [bitcoin eco, btc eco, bitcoineco]
+
+- name: Meme
+  type: theme
+  keywords: [meme, meme culture, doge meme, dog meme]
+
+- name: Free&fair
+  type: theme
+  keywords: [free & fair, fair launch, decentralised fair]
+
+- name: Web3
+  type: theme
+  keywords: [nft, ip expansion, web3 brand, irl meetup]
+
+- name: Listing
+  type: theme
+  keywords: [listing, exchange listing, cex listing]
+
+- name: Operation DOG Domination
+  type: theme
+  keywords: [dog domination, op dog domination, multi-chain]
+
+- name: Crypto Adoption
+  type: theme
+  keywords: [mass adoption, onboarding, crypto adoption]
+
+- name: Runes
+  type: theme
+  keywords: [runes, rune protocol, technical rune]
