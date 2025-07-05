@@ -1,0 +1,12 @@
+name: Sniffer Cron
+on:
+  schedule:
+    - cron: '*/2 * * * *'   # UTC 기준 2분마다
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call sniffer-recent
+        run: |
+          curl -sS "https://fgamdcaijqkkioafnqga.functions.supabase.co/sniffer-recent" \
+               -o /dev/null
