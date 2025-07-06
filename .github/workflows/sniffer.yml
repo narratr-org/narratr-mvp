@@ -1,11 +1,24 @@
 name: Sniffer Cron
+
 on:
   schedule:
-    - cron: '*/2 * * * *'   # 매 2분 (UTC)
-  workflow_dispatch:        # 필요하면 수동 실행 버튼
+    - cron: "*/15 * * * *"   # 매 15분
+  workflow_dispatch:         # 수동 실행 버튼
+
 jobs:
-  ping:
+  sniff:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      TWITTER_BEARER: ${{ secrets.TWITTER_BEARER }}
     steps:
-      - name: Call Supabase function
-        run: curl -sS "https://fgamdcaijqkkioafnqga.functions.supabase.co/sniffer-recent"
+      - uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x   # 최신 LTS
+
+      - name: Run sniffer
+        run: deno run --allow-net --allow-env scripts/sniffer_or.ts
