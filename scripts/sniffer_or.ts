@@ -1,83 +1,111 @@
-// ────────────── 환경 준비 ──────────────
+/**
+ * scripts/sniffer_or.ts
+ * --------------------------------------------------
+ * 1) GitHub Actions (cron) 으로 5 분마다 실행
+ * 2) 지정한 KOL 8명의 트윗 중 $DOG·$dog 포함 글을 수집
+ * 3) Supabase social_raw 테이블에 upsert
+ * 4) 실행 건수를 sniffer_logs 테이블에 기록  ← NEW!
+ * --------------------------------------------------
+ *  ⚠️  사전 준비
+ *   - .github/workflows/sniffer.yml 에 SUPABASE_URL, SUPABASE_SERVICE_KEY,
+ *     TWITTER_BEARER 세 개의 secret 이 있어야 함.
+ */
+
 import "https://deno.land/std@0.224.0/async/delay.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.3";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Database } from "../supabase/types.ts"; // ① 타입 생성기 돌린 경우만
 
-// .github/workflows/sniffer.yml 의 env → Actions 런타임으로 전달됨
-const { SUPABASE_URL, SUPABASE_SERVICE_KEY, TWITTER_BEARER } = Deno.env.toObject();
+/* ---------- 1. 환경 변수 ---------- */
+const SUPABASE_URL   = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_KEY   = Deno.env.get("SUPABASE_SERVICE_KEY")!;
+const TWITTER_BEARER = Deno.env.get("TWITTER_BEARER")!;
 
-// ▶︎ Supabase
-const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
+/* ---------- 2. Supabase 클라이언트 ---------- */
+const supabase = /** @type {import("@supabase/supabase-js").SupabaseClient<Database>} */
+  (createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false }}));
 
-// ▶︎ KOL 목록 (필요하면 수정)
+/* ---------- 3. KOL 목록 ---------- */
 const KOLS = [
-  "LeonidasNFT", "MrKeyway", "cryptolution101",
-  "vittopantoliano", "dogofbitcoin", "edmond_dantes_j",
-  "Relentless_btc", "CoinWeb3",
+  "LeonidasNFT",
+  "MrKeyway",
+  "cryptolution101",
+  "vittopantoliano",
+  "dogofbitcoin",
+  "edmond_dantes_j",
+  "Relentless_btc",
+  "CoinWeb3",
 ];
 
-// ────────────── 헬퍼 함수 ──────────────
-/** state 테이블 (1 row) 에 마지막 트윗 id 를 저장/읽기 */
-async function getLastId(): Promise<string | null> {
-  const { data } = await supabase
-    .from("sniffer_state")
-    .select("last_id")
-    .single();
-  return data?.last_id ?? null;
+/* ---------- 4. since_id 보정 로직 ---------- */
+async function loadSinceId(): Promise<string | undefined> {
+  const { data, error } = await supabase
+    .from("social_raw")
+    .select("id")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) console.error("loadSinceId:", error.message);
+  return data?.id?.toString();          // 없으면 undefined 반환
 }
 
-async function setLastId(id: string) {
-  await supabase.from("sniffer_state")
-    .upsert({ id: 1, last_id: id });           // PK = 1 한 줄만 유지
-}
+/* ---------- 5. Twitter Recent Search ---------- */
+async function fetchTweets(sinceId?: string) {
+  // (from:user1 OR from:user2 ...) AND ($DOG OR $dog)
+  const query =
+    `(${KOLS.map((h) => `from:${h}`).join(" OR ")}) ($DOG OR $dog) -is:retweet`;
 
-/** Twitter API 호출 – 없는 경우 since_id 생략 */
-async function fetchTweets(query: string, sinceId?: string) {
-  const url = new URL("https://api.twitter.com/2/tweets/search/recent");
-  url.searchParams.set("query", query);
-  url.searchParams.set("max_results", "15");       // 첫 실행 과호출 방지
-  if (sinceId) url.searchParams.set("since_id", sinceId);
+  const params = new URLSearchParams({
+    query,
+    "tweet.fields": "author_id,created_at,lang",
+    max_results: "100",
+  });
+  if (sinceId) params.set("since_id", sinceId);
 
-  const res = await fetch(url, {
+  const res = await fetch(`https://api.twitter.com/2/tweets/search/recent?${params}`, {
     headers: { Authorization: `Bearer ${TWITTER_BEARER}` },
   });
   if (!res.ok) throw new Error(`Twitter ${res.status}: ${await res.text()}`);
-  const json = await res.json();
-  return json?.data ?? [];
+
+  type TwitterResp = {
+    data?: { id: string; author_id: string; text: string; lang: string; created_at: string }[];
+  };
+  const json = (await res.json()) as TwitterResp;
+  return json.data ?? [];
 }
 
-// ────────────── 메인 로직 ──────────────
-const kolFilter = KOLS.map(u => `from:${u}`).join(" OR ");
-const dogFilter = '"$DOG" OR "$dog"';
-const query = `${kolFilter} ${dogFilter} -is:retweet`;
+/* ---------- 6. 메인 실행 ---------- */
+(async () => {
+  try {
+    const sinceId = await loadSinceId();
+    const tweets  = await fetchTweets(sinceId);
 
-try {
-  // 1) 마지막 id 읽기
-  const sinceId = await getLastId();     // null 이면 생략
+    if (tweets.length) {
+      const rows = tweets.map((t) => ({
+        id:          Number(t.id),             // social_raw PK
+        author_handle: t.author_id,
+        text:        t.text,
+        lang:        t.lang,
+        source_url:  `https://x.com/i/web/status/${t.id}`,
+        created_at:  t.created_at,
+      }));
 
-  // 2) 트윗 가져오기
-  const tweets = await fetchTweets(query, sinceId);
-  if (!tweets.length) {
-    console.log("No new tweets 👌");
-    Deno.exit(0);
+      // upsert + ignoreDuplicates → PK(id) 겹치면 무시
+      const { error } = await supabase
+        .from("social_raw")
+        .upsert(rows, { ignoreDuplicates: true });
+      if (error) throw error;
+
+      /* ------------- NEW: 실행 건수 로그 ------------- */
+      await supabase.from("sniffer_logs").insert({ inserted: rows.length });
+      /* ---------------------------------------------- */
+
+      console.log(`✅ stored ${rows.length} tweets`);
+    } else {
+      console.log("✅ no new tweets");
+    }
+  } catch (err) {
+    console.error("❌", err);
+    Deno.exit(1);                       // GitHub Actions fail 표시
   }
-
-  // 3) DB 삽입 (중복은 Supabase PK 충돌로 자동 무시)
-  const rows = tweets.map((t: any) => ({
-    id: t.id,
-    author_handle: t.author_id,
-    text: t.text,
-    lang: t.lang,
-    source_url: `https://x.com/i/web/status/${t.id}`,
-    created_at: t.created_at,
-  }));
-  await supabase.from("social_raw").upsert(rows);
-
-  // 4) 가장 큰 id → state 업데이트
-  const maxId = tweets.reduce((m: string, t: any) => (t.id > m ? t.id : m), sinceId ?? "0");
-  await setLastId(maxId);
-
-  console.log(`✅ stored ${rows.length} tweets, last_id=${maxId}`);
-} catch (err) {
-  // 에러는 로깅만 하고 0 반환 → 워크플로 “성공” 처리
-  console.error("Sniffer error:", err.message);
-}
+})();
