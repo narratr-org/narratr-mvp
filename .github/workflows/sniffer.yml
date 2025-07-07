@@ -1,17 +1,18 @@
+# .github/workflows/sniffer.yml
 name: Sniffer Cron
 
 on:
   schedule:
-    - cron: "*/15 * * * *"     # 15분마다
-  workflow_dispatch:
+    - cron: "*/15 * * * *"        # 15 분마다(정각·15·30·45분)
+  workflow_dispatch:              # 수동 실행 버튼
 
 jobs:
   sniff:
     runs-on: ubuntu-latest
     env:
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      TWITTER_BEARER: ${{ secrets.TWITTER_BEARER }}
+      SUPABASE_URL:           ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TWITTER_BEARER:         ${{ secrets.TWITTER_BEARER }}
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v1
