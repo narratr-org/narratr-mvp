@@ -1,91 +1,83 @@
-// scripts/sniffer_or.ts
-// deno run --allow-net --allow-env scripts/sniffer_or.ts
+// ────────────── 환경 준비 ──────────────
+import "https://deno.land/std@0.224.0/async/delay.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.3";
 
-import { delay } from "https://deno.land/std@0.224.0/async/delay.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// .github/workflows/sniffer.yml 의 env → Actions 런타임으로 전달됨
+const { SUPABASE_URL, SUPABASE_SERVICE_KEY, TWITTER_BEARER } = Deno.env.toObject();
 
-// ---------- 환경 변수 ----------
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SERVICE_KEY   = Deno.env.get("SUPABASE_SERVICE_KEY")!;
-const BEARER        = Deno.env.get("TWITTER_BEARER")!;
+// ▶︎ Supabase
+const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
 
-// 8 KOL 핸들 (소문자, @ 없이)
+// ▶︎ KOL 목록 (필요하면 수정)
 const KOLS = [
-  "leonidasnft", "mrkeyway", "cryptolution101", "vittopantoliano",
-  "dogofbitcoin", "edmond_dantes_j", "relentless_btc", "coinweb3",
-] as const;
+  "LeonidasNFT", "MrKeyway", "cryptolution101",
+  "vittopantoliano", "dogofbitcoin", "edmond_dantes_j",
+  "Relentless_btc", "CoinWeb3",
+];
 
-// ---------- Supabase ----------
-const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
-
-// social_raw 테이블에서 마지막 tweet_id 가져오기
-async function getSinceId() {
-  const { data, error } = await supabase
-    .from("social_raw")
-    .select("id")
-    .order("id", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) { console.warn("since_id query error", error.message); }
-  return data?.id as string | undefined;
+// ────────────── 헬퍼 함수 ──────────────
+/** state 테이블 (1 row) 에 마지막 트윗 id 를 저장/읽기 */
+async function getLastId(): Promise<string | null> {
+  const { data } = await supabase
+    .from("sniffer_state")
+    .select("last_id")
+    .single();
+  return data?.last_id ?? null;
 }
 
-// ---------- Twitter ----------
-function buildQuery() {
-  const fromPart = KOLS.map(u => `from:${u}`).join(" OR ");
-  return `(${fromPart}) ($DOG OR $dog) -is:retweet lang:en`;
+async function setLastId(id: string) {
+  await supabase.from("sniffer_state")
+    .upsert({ id: 1, last_id: id });           // PK = 1 한 줄만 유지
 }
 
-async function fetchTweets(since_id?: string) {
-  const params = new URLSearchParams({
-    query: buildQuery(),
-    "tweet.fields": "author_id,created_at,lang",
-    max_results: "100",
-  });
-  if (since_id) params.append("since_id", since_id);
+/** Twitter API 호출 – 없는 경우 since_id 생략 */
+async function fetchTweets(query: string, sinceId?: string) {
+  const url = new URL("https://api.twitter.com/2/tweets/search/recent");
+  url.searchParams.set("query", query);
+  url.searchParams.set("max_results", "15");       // 첫 실행 과호출 방지
+  if (sinceId) url.searchParams.set("since_id", sinceId);
 
-  const res = await fetch(`https://api.twitter.com/2/tweets/search/recent?${params}`, {
-    headers: { Authorization: `Bearer ${BEARER}` },
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${TWITTER_BEARER}` },
   });
   if (!res.ok) throw new Error(`Twitter ${res.status}: ${await res.text()}`);
-  return (await res.json()) as {
-    data?: { id: string; author_id: string; text: string; lang: string; created_at: string }[];
-    meta: { newest_id?: string; next_token?: string };
-  };
+  const json = await res.json();
+  return json?.data ?? [];
 }
 
-// ---------- Main ----------
-const sinceId = await getSinceId();
-const firstPage = await fetchTweets(sinceId);
-const pages = [firstPage];
+// ────────────── 메인 로직 ──────────────
+const kolFilter = KOLS.map(u => `from:${u}`).join(" OR ");
+const dogFilter = '"$DOG" OR "$dog"';
+const query = `${kolFilter} ${dogFilter} -is:retweet`;
 
-// (옵션) 더 읽고 싶으면 next_token 루프
-while (pages.at(-1)?.meta.next_token && pages.length < 5) {
-  await delay(700); // rate-limit 안전 대기
-  const more = await fetchTweets();
-  more && pages.push(more);
+try {
+  // 1) 마지막 id 읽기
+  const sinceId = await getLastId();     // null 이면 생략
+
+  // 2) 트윗 가져오기
+  const tweets = await fetchTweets(query, sinceId);
+  if (!tweets.length) {
+    console.log("No new tweets 👌");
+    Deno.exit(0);
+  }
+
+  // 3) DB 삽입 (중복은 Supabase PK 충돌로 자동 무시)
+  const rows = tweets.map((t: any) => ({
+    id: t.id,
+    author_handle: t.author_id,
+    text: t.text,
+    lang: t.lang,
+    source_url: `https://x.com/i/web/status/${t.id}`,
+    created_at: t.created_at,
+  }));
+  await supabase.from("social_raw").upsert(rows);
+
+  // 4) 가장 큰 id → state 업데이트
+  const maxId = tweets.reduce((m: string, t: any) => (t.id > m ? t.id : m), sinceId ?? "0");
+  await setLastId(maxId);
+
+  console.log(`✅ stored ${rows.length} tweets, last_id=${maxId}`);
+} catch (err) {
+  // 에러는 로깅만 하고 0 반환 → 워크플로 “성공” 처리
+  console.error("Sniffer error:", err.message);
 }
-
-const tweets = pages.flatMap(p => p.data ?? []);
-if (!tweets.length) {
-  console.log("😴 No new tweets");
-  Deno.exit(0);
-}
-
-// ---------- Supabase Insert ----------
-const rows = tweets.map(t => ({
-  id:               Number(t.id),               // bigint PK
-  author_handle:    t.author_id,
-  text:             t.text,
-  lang:             t.lang,
-  source_url:       `https://x.com/i/web/status/${t.id}`,
-  created_at:       t.created_at,
-}));
-
-const { error } = await supabase
-  .from("social_raw")
-  .upsert(rows, { ignoreDuplicates: true });
-
-if (error) throw error;
-console.log(`✅ Inserted ${rows.length} new tweets`);

@@ -2,8 +2,8 @@ name: Sniffer Cron
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # 매 15분
-  workflow_dispatch:         # 수동 실행 버튼
+    - cron: "*/5 * * * *"     # 5분마다
+  workflow_dispatch:
 
 jobs:
   sniff:
@@ -14,11 +14,8 @@ jobs:
       TWITTER_BEARER: ${{ secrets.TWITTER_BEARER }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Deno
-        uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.x   # 최신 LTS
-
-      - name: Run sniffer
+          deno-version: v1.x
+      - name: run sniffer
         run: deno run --allow-net --allow-env scripts/sniffer_or.ts
