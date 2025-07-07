@@ -48,7 +48,7 @@ async function getSinceId(): Promise<string | null> {
 /** ▒▒▒ ❷ Twitter API 호출 ▒▒▒ */
 async function fetchTweets(sinceId: string | null) {
   const query =
-    `(${KOLS.map((u) => `from:${u}`).join(" OR ")}) ($DOG OR $dog) -is:retweet`;
+    `(${KOLS.map((u) => `from:${u}`).join(" OR ")}) (DOG OR dog) -is:retweet`;
   const params = new URLSearchParams({
     query,
     "tweet.fields": "author_id,created_at,lang",
