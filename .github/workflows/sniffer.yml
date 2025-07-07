@@ -2,7 +2,7 @@ name: Sniffer Cron
 
 on:
   schedule:
-    - cron: "*/5 * * * *"     # 5분마다
+    - cron: "*/15 * * * *"     # 15분마다
   workflow_dispatch:
 
 jobs:
