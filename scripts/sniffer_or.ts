@@ -15,7 +15,7 @@ const {
   TWITTER_BEARER,
 } = Deno.env.toObject();
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !TWITTER_BEARER) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !TWITTER_BEARER) {
   throw new Error("❌ env 가 비어 있습니다 (SUPABASE_URL / SUPABASE_SERVICE_KEY / TWITTER_BEARER)");
 }
 
