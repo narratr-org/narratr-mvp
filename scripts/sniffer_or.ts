@@ -10,7 +10,7 @@ const {
   SUPABASE_URL,
   SUPABASE_SERVICE_KEY,
   TWITTER_BEARER,
-  TWEET_LIMIT = "5",           // 한 달 한도(15 000) 고려 1회당 기본 5개
+  TWEET_LIMIT = "10",           // 한 달 한도(15 000) 고려 1회당 기본 10개
 } = Deno.env.toObject();
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !TWITTER_BEARER) {
