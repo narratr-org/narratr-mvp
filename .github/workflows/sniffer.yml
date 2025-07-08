@@ -3,7 +3,7 @@ name: Sniffer Cron
 
 on:
   schedule:
-    - cron: "*/15 * * * *"        # 15 분마다(정각·15·30·45분)
+    - cron: "*/30 * * * *"        # 30 분마다(정각·30분)
   workflow_dispatch:              # 수동 실행 버튼
 
 jobs:
