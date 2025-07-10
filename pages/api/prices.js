@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabaseClient';
 
 export default async function handler(req, res) {
   try {
-    // 최근 2개 캔들(close 가격) 가져오기
+    // 최근 2개 캔들의 close 가격 조회
     const { data, error } = await supabase
       .from('price_candles')
       .select('ts, close')
@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     const prev    = data[1] ? data[1].close : current;
     const change  = prev ? ((current - prev) / prev) * 100 : 0;
 
-    // 1분 CDN 캐시
+    // 1 분 CDN 캐시
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=60');
 
     res.status(200).json({ price: current, change });
