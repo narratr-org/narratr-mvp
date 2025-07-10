@@ -7,7 +7,7 @@ export default function Home() {
         $DOG 가격 · 공지 · KOL 멘션을 한 눈에!<br/>
         현재는 $DOG 전용 피드만 제공합니다.
       </p>
-      <Link href="/dog" className="px-6 py-3 bg-accent rounded-xl text-white font-semibold hover:opacity-90">
+      <Link href='/dog/feed' className="px-6 py-3 bg-accent rounded-xl text-white font-semibold hover:opacity-90">
         Go to $DOG Feed
       </Link>
     </main>
