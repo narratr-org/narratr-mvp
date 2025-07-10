@@ -1,5 +1,5 @@
 // pages/dog/index.js
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Line } from 'react-chartjs-2';
@@ -12,6 +12,9 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import TagKolFilter from '../../components/TagKolFilter';
+import { TAGS } from '../../lib/tags';
+import { KOLS } from '../../lib/kols';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
 
@@ -19,12 +22,20 @@ export default function ChartPage() {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [chartData, setChartData] = useState(null);
+  const [filters, setFilters] = useState({ tag: '', kol: '' });
 
   const fetchData = async () => {
     const from = Math.floor(startDate.getTime() / 1000);
     const to = Math.floor(endDate.getTime() / 1000);
 
-    const res = await fetch(`/api/chart?from=${from}&to=${to}`);
+    const params = new URLSearchParams({
+      from: String(from),
+      to: String(to),
+      tag: filters.tag,
+      kol: filters.kol,
+    });
+
+    const res = await fetch(`/api/chart?${params.toString()}`);
     const data = await res.json();
 
     if (Array.isArray(data)) {
@@ -49,6 +60,8 @@ export default function ChartPage() {
   return (
     <div style={{ padding: '2rem' }}>
       <h1>📊 DOG 가격 차트</h1>
+
+      <TagKolFilter tags={TAGS} kols={KOLS} onChange={setFilters} />
 
       <div style={{ margin: '1rem 0' }}>
         <label>시작일: </label>
