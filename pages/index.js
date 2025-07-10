@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import PriceTicker from '../components/PriceTicker';
 export default function Home() {
   return (
     <main className='min-h-screen flex flex-col items-center justify-center bg-brand text-black'>
@@ -7,6 +8,7 @@ export default function Home() {
         $DOG 가격 · 공지 · KOL 멘션을 한 눈에!<br/>
         현재는 $DOG 전용 피드만 제공합니다.
       </p>
+      <PriceTicker />
       <Link href="/dog" className="px-6 py-3 bg-accent rounded-xl text-white font-semibold hover:opacity-90">
         Go to $DOG Feed
       </Link>
