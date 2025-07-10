@@ -2,10 +2,7 @@ import React from 'react';
 import { useLatestPrice } from '../lib/usePrice';
 
 export default function PriceTicker() {
-  const { price, change, isLoading, error } = useLatestPrice();
-
-  if (error) return <div className="text-red-600">Failed to load</div>;
-  if (isLoading) return <div>Loading...</div>;
+  const { price, change } = useLatestPrice();
 
   const changeColor = change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : 'text-gray-600';
 
