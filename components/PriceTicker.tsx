@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLatestPrice } from '../lib/usePrice';
+import { useLatestPrice } from '@lib/usePrice';
 
 export default function PriceTicker() {
   // 실시간 가격·변동률
