@@ -13,16 +13,19 @@ const fetcher = async (url: string): Promise<PriceData> => {
   return res.json()
 }
 
-export function useLatestPrice() {
+export function useLatestPrice(): PriceData {
   const { data, error } = useSWR<PriceData>('/api/prices', fetcher, {
-    refreshInterval: 30000,
+    refreshInterval: 60000,
   })
+
+  if (error) {
+    throw error
+  }
 
   return {
     price: data?.price ?? 0,
     change: data?.change ?? 0,
-    isLoading: !data && !error,
-    error,
   }
 }
+
 
