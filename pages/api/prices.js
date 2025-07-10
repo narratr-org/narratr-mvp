@@ -2,26 +2,26 @@ import { supabase } from '../../lib/supabaseClient';
 
 export default async function handler(req, res) {
   try {
-    // 최신 시세 한 개 조회
+    // 최근 2개 캔들(close 가격) 가져오기
     const { data, error } = await supabase
-      .from('prices')
-      .select('*')
-      .order('time', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .from('price_candles')
+      .select('ts, close')
+      .order('ts', { ascending: false })
+      .limit(2);
 
-    if (error) {
-      console.error('Supabase query error', error.message);
-      return res.status(500).json({ error: 'Database error' });
-    }
-    if (!data) {
-      return res.status(404).json({ error: 'Price not found' });
+    if (error) return res.status(500).json({ error: error.message });
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'No price data' });
     }
 
-    // 캐싱 헤더: 1분간 CDN 캐시, 브라우저 캐시는 없음
+    const current = data[0].close;
+    const prev    = data[1] ? data[1].close : current;
+    const change  = prev ? ((current - prev) / prev) * 100 : 0;
+
+    // 1분 CDN 캐시
     res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=60');
 
-    return res.status(200).json(data);
+    res.status(200).json({ price: current, change });
   } catch (err) {
     console.error('Unexpected error', err);
     res.status(500).json({ error: 'Internal server error' });
