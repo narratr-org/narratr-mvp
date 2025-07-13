@@ -1,0 +1,8 @@
+# 스케줄·대용량 함수는 Preview 빌드에서 제외
+api/cron/
+api/translate/
+api/prices/
+api/chart/
+
+# node_modules 전체 제외(Next.js가 자동 추적)
+node_modules/
