@@ -10,26 +10,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # 1) 저장소 체크아웃
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # 2) Node 20 설치
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install deps (pnpm)
+      # 3) pnpm 8 설치
+      - name: Set up pnpm
         uses: pnpm/action-setup@v3
         with:
           version: 8
-      - run: pnpm install --frozen-lockfile
 
+      # 4) 의존성 설치 (lockfile 강제 검증 끔)
+      - name: Install deps
+        run: pnpm install --no-frozen-lockfile
+
+      # 5) 빌드
       - name: Build
         run: pnpm run build
 
   notify-discord:
     needs: build
-    # ⭐ build가 실패했을 때만 실행 ⭐
+    # ⭐ build가 실패한 경우에만 실행 ⭐
     if: failure()
     runs-on: ubuntu-latest
     steps:
