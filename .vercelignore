@@ -1,8 +1,14 @@
-# 스케줄·대용량 함수는 Preview 빌드에서 제외
-api/cron/
-api/translate/
-api/prices/
-api/chart/
+# --- BEGIN .vercelignore ---
 
-# node_modules 전체 제외(Next.js가 자동 추적)
+# ❶ 모든 API Route를 Preview 빌드에서 제외
+.next/standalone/**/api/**
+
+# ❷ node_modules (빌드에 자동 포함되므로 다시 올릴 필요 없음)
 node_modules/
+
+# ❸ Vercel 로직에 필요 없는 타입, 맵, 테스트 파일
+**/*.d.ts
+**/*.map
+**/__tests__/**
+
+# --- END .vercelignore ---
