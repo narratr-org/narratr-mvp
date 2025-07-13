@@ -1,6 +1,8 @@
 # narratr-mvp
 Narratr MVP – auto-summary &amp; KOL traffic hub
 
+▶ 자세한 구조 문서: [docs/architecture.md](docs/architecture.md)
+
 ## Quick start (dev)
 
 ```bash
