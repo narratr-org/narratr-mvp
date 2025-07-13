@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/fetch_price",
-      "schedule": "0 2 * * *"   // 하루 한 번, 새벽 2시
+      "schedule": "0 2 * * *"
     }
   ]
 }
