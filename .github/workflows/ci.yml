@@ -1,0 +1,45 @@
+name: CI & Discord Alert   # 표시 이름
+
+on:
+  push:
+    branches: [main]       # main에 푸시될 때
+  pull_request:            # PR 생성·업데이트 때
+    types: [opened, synchronize]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps (pnpm)
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+  notify-discord:
+    needs: build
+    # ⭐ build가 실패했을 때만 실행 ⭐
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord alert
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ needs.build.result }}
+          COMMIT: ${{ github.sha }}
+          URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -X POST "$WEBHOOK_URL" \
+          -H "Content-Type: application/json" \
+          -d "{\"content\":\"🚨 CI failed! Status: $STATUS \\nCommit: $COMMIT \\n<${URL}>\"}"
