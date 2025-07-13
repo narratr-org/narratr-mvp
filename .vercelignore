@@ -1,14 +1,16 @@
-# --- BEGIN .vercelignore ---
+# ───────────────────────────────
+#   .vercelignore  (Preview 전용)
+# ───────────────────────────────
 
-# ❶ 모든 API Route를 Preview 빌드에서 제외
-.next/standalone/**/api/**
+# ① 모든 API Route, Cron, Edge 함수 → Preview 빌드에서 제외
+pages/api/**
+src/pages/api/**
+app/api/**
 
-# ❷ node_modules (빌드에 자동 포함되므로 다시 올릴 필요 없음)
+# ② node_modules는 Next가 자동 추적하므로 제외
 node_modules/
 
-# ❸ Vercel 로직에 필요 없는 타입, 맵, 테스트 파일
+# ③ 타입·맵·테스트 파일도 제외 (용량 미세 절감)
 **/*.d.ts
 **/*.map
 **/__tests__/**
-
-# --- END .vercelignore ---
