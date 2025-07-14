@@ -1,4 +1,8 @@
 {
+  // ⬇️  Preview(= PR) 빌드 건너뛰기용
+  "ignoreCommand": "echo \"skip preview\" && exit 0",
+
+  // ⬇️  Production(main) 배포에서만 실행될 크론
   "crons": [
     {
       "path": "/api/cron/fetch_price",
