@@ -1,22 +1,15 @@
 // pages/dog/index.js
+export const runtime = 'experimental-edge';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  LineElement,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Tooltip,
-  Legend
-} from 'chart.js';
 import TagKolFilter from '../../components/TagKolFilter';
 import { TAGS } from '../../lib/tags';
 import { KOLS } from '../../lib/kols';
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
+const DogChart = dynamic(() => import('@/components/DogChart'), { ssr: false });
+
 
 export default function ChartPage() {
   const [startDate, setStartDate] = useState(new Date());
@@ -73,7 +66,7 @@ export default function ChartPage() {
         <button style={{ marginLeft: '1rem' }} onClick={fetchData}>조회</button>
       </div>
 
-      {chartData && <Line data={chartData} />}
+      {chartData && <DogChart data={chartData} />}
     </div>
   );
 }
