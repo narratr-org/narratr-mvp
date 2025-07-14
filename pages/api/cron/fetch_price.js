@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { createClient } from '@supabase/supabase-js';
 import fetch from 'node-fetch'; // Node 18+ 환경이면 생략해도 됨
 
