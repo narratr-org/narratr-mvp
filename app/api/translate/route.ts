@@ -1,10 +1,10 @@
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabase } from '@/lib/supabaseEdge';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!);
+  const supabase = await getSupabase();
   const { searchParams } = new URL(request.url);
   const tag = searchParams.get('tag') || undefined;
   const kol = searchParams.get('kol') || undefined;
