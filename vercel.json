@@ -1,8 +1,5 @@
 {
-  
   "ignoreCommand": "echo \"skip preview\" && exit 0",
-
-  
   "crons": [
     {
       "path": "/api/cron/fetch_price",
