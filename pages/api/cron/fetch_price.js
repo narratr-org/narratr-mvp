@@ -1,6 +1,5 @@
 export const runtime = 'edge';
 import { createClient } from '@supabase/supabase-js';
-import fetch from 'node-fetch'; // Node 18+ 환경이면 생략해도 됨
 
 // 크론 스케줄: 매 5분마다 실행 (UTC 기준)
 export const config = {
