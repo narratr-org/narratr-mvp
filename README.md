@@ -20,3 +20,4 @@ echo 'TWITTER_BEARER=...'   >> .env
 # 4. 테스트
 python ingest_worker.py          # 트윗 JSON 생성
 python summarizer.py             # 요약·키워드 확인
+
