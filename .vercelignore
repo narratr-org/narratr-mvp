@@ -1,15 +1,6 @@
-# ───────────────────────────────
-#  .vercelignore   (Production 용량 최적화)
-# ───────────────────────────────
-
-# 1) node_modules 는 Next가 알아서 처리 → 제외
+# ────────────────
+# Vercel Ignore
+# ────────────────
 node_modules/
-
-# 2) 타입 파일 · 소스맵 · 테스트 폴더 → 굳이 배포 X
 **/*.d.ts
 **/*.map
-**/__tests__/**
-
-# 3) (※ API Route는 삭제했어요!)  
-#    전에 용량 때문에 막아둔 라인: pages/api/** src/pages/api/** app/api/**  
-#    이제 Production 빌드엔 필요하므로 주석 처리 - 또는 완전 삭제
