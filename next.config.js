@@ -1,12 +1,17 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: { runtime: 'edge' },
   webpack(config) {
-    // Edge 번들에서는 node:fs 등 무시
-    if (!config.resolve.fallback) config.resolve.fallback = {};
-    ['fs','net','tls','path','http','https'].forEach(k => (config.resolve.fallback[k] = false));
-    config.resolve.alias['@'] = path.resolve(__dirname);
+    config.resolve.fallback = {
+      fs: false,
+      path: false,
+      net: false,
+      tls: false,
+      child_process: false,
+      http: false,
+      https: false,
+      url: false,
+    };
     return config;
   },
 };
