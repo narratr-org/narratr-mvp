@@ -1,42 +1,34 @@
-name: CI & Discord Alert   # 표시 이름
+name: CI & Discord Alert
 
 on:
   push:
-    branches: [main]       # main에 푸시될 때
-  pull_request:            # PR 생성·업데이트 때
+    branches: [main]
+  pull_request:
     types: [opened, synchronize]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1) 저장소 체크아웃
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2) Node 20 설치
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 3) pnpm 8 설치
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v3
         with:
           version: 8
 
-      # 4) 의존성 설치 (lockfile 강제 검증 끔)
+      # ✅ 여기! lock 검사를 끈 상태로 설치
       - name: Install deps
         run: pnpm install --no-frozen-lockfile
 
-      # 5) 빌드
       - name: Build
         run: pnpm run build
 
   notify-discord:
     needs: build
-    # ⭐ build가 실패한 경우에만 실행 ⭐
     if: failure()
     runs-on: ubuntu-latest
     steps:
@@ -48,5 +40,5 @@ jobs:
           URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           curl -X POST "$WEBHOOK_URL" \
-          -H "Content-Type: application/json" \
-          -d "{\"content\":\"🚨 CI failed! Status: $STATUS \\nCommit: $COMMIT \\n<${URL}>\"}"
+               -H "Content-Type: application/json" \
+               -d "{\"content\":\"🚨 CI failed! Status: $STATUS \\nCommit: $COMMIT \\n<${URL}>\"}"
