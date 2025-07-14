@@ -2,22 +2,21 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1) 서버리스 함수 크기를 대폭 줄여 주는 스탠드얼론 모드
-  output: 'standalone',
-
-  // 2) 기존 별칭 설정 유지 및 Node 네이티브 모듈 Fallback 끔
-  webpack(config) {
-    config.resolve.alias['@'] = path.resolve(__dirname);
-    // 브라우저·Edge 번들에서 node:* 네이티브 모듈 무시
+  // ❶ ‘standalone’ 제거 → Vercel의 기본 file-tracing 으로만 복사
+  webpack(config, { isServer }) {
+    // ❷ Node 네이티브 모듈 polyfill 제거 (빌드 속도 & 크기↓)
     if (!config.resolve.fallback) config.resolve.fallback = {};
-    Object.assign(config.resolve.fallback, {
-      fs: false,
-      net: false,
-      tls: false,
-      path: false,
-      http: false,
-      https: false,
-    });
+    ['fs', 'net', 'tls', 'path', 'http', 'https'].forEach(k => (config.resolve.fallback[k] = false));
+
+    // ❸ 서버 번들에서 dev 전용 패키지 완전히 제외
+    if (isServer) {
+      config.externals.push(
+        // 예: antd css loader 같은 프론트 전용 패키지
+        /^chart\.js$/,
+      );
+    }
+
+    config.resolve.alias['@'] = path.resolve(__dirname);
     return config;
   },
 };
