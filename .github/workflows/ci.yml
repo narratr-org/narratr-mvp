@@ -1,0 +1,49 @@
+name: CI & Discord Alert
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1) 코드 체크아웃
+      - uses: actions/checkout@v4
+
+      # 2) Node 20 설치
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3) pnpm 8 설치 (자동 설치 끔!)
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false        # ← 핵심: auto install OFF
+
+      # 4) 의존성 설치 (lock 검사 해제)
+      - name: Install deps
+        run: pnpm install --no-frozen-lockfile
+
+      # 5) 빌드
+      - name: Build
+        run: pnpm run build
+
+  notify-discord:
+    needs: build
+    if: failure()                   # build 실패할 때만 실행
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord alert
+        env:
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          STATUS: ${{ needs.build.result }}
+          COMMIT: ${{ github.sha }}
+          URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl -X POST "$WEBHOOK_URL" \
+               -H "Content-Type: application/json" \
+               -d "{\"content\":\"🚨 CI failed! Status: $STATUS \\nCommit: $COMMIT \\n<${URL}>\"}"
