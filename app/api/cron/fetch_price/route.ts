@@ -1,11 +1,14 @@
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-import { getSupabase } from '@/lib/supabaseEdge';
 import { NextResponse } from 'next/server';
 const INTERVALS = [1, 5, 15, 60];
 
 export async function GET(request: Request) {
-  const supabase = await getSupabase();
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  );
   console.log(`🚀 [CRON] Job started at ${new Date().toISOString()}`);
 
   try {

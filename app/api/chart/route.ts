@@ -1,8 +1,12 @@
 export const runtime = 'edge';
-import { getSupabase } from '@/lib/supabaseEdge';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  );
   try {
     const { searchParams } = new URL(request.url);
     const from = parseInt(searchParams.get('from') || '', 10);
@@ -12,7 +16,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid timestamp format' }, { status: 400 });
     }
 
-    const supabase = await getSupabase();
     const fromISO = new Date(from * 1000).toISOString();
     const toISO = new Date(to * 1000).toISOString();
 

@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: { runtime: 'edge' },
   webpack(config) {
     config.resolve.fallback = {
       fs: false,

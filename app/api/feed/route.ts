@@ -1,6 +1,5 @@
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-import { getSupabase } from '@/lib/supabaseEdge'
 import { NextResponse } from 'next/server'
 
 /**
@@ -13,7 +12,11 @@ import { NextResponse } from 'next/server'
  * 응답 형태 { total, items[] }
  */
 export async function GET(request: Request) {
-  const supabase = await getSupabase()
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  )
   try {
     const { searchParams } = new URL(request.url)
     const page = searchParams.get('page') || '1'

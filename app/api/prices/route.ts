@@ -1,10 +1,13 @@
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-import { getSupabase } from '@/lib/supabaseEdge';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const supabase = await getSupabase()
+  const { createClient } = await import('@supabase/supabase-js');
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  )
   try {
     // 최근 2개 캔들의 close 가격 조회
     const { data, error } = await supabase
