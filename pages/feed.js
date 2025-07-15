@@ -1,3 +1,5 @@
+export const runtime = 'experimental-edge';
+
 import useFeed from '../hooks/useFeed';
 
 export default function FeedPage() {
