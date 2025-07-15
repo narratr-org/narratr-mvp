@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const runtime = 'experimental-edge';
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import dynamicFn from 'next/dynamic';
