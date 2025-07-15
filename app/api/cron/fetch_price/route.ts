@@ -1,4 +1,4 @@
-export const runtime = 'edge';
+export const runtime = 'experimental-edge';
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 const INTERVALS = [1, 5, 15, 60];
