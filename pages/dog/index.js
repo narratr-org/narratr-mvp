@@ -1,5 +1,5 @@
 // pages/dog/index.js
-export const runtime = 'experimental-edge';
+export const runtime = 'edge';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import DatePicker from 'react-datepicker';
