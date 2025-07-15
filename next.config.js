@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 // Standalone output removed to reduce bundle size
 const nextConfig = {
-  experimental: {
-    runtime: 'experimental-edge',
-  },
   webpack(config) {
     config.resolve.fallback = {
       fs: false,
