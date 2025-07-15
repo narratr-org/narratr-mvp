@@ -1,6 +1,5 @@
 {
   "functions": {
-    // Next.js App Router의 Edge API route를 모두 Edge Runtime으로 지정
     "app/api/**/*.ts": {
       "runtime": "@vercel/edge@1.0.0"
     }
