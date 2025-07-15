@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Standalone output removed to reduce bundle size
 const nextConfig = {
   webpack(config) {
     config.resolve.fallback = {
