@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
+  // use the lightweight ESM build
   const { createClient } = await import('@supabase/supabase-js/dist/module/index.js');
   const supabase = createClient(
     process.env.SUPABASE_URL!,

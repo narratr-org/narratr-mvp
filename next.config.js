@@ -22,9 +22,16 @@ const nextConfig = {
       });
     }
     if (isEdgeRuntime) {
-      config.externals = [...(config.externals || []), '@supabase/supabase-js'];
+      // 1) Don’t bundle the full supabase-client into your Edge functions
+      config.externals = [...(config.externals || []), '@supabase/supabase-js']
+
+      // 2) Always resolve imports to the tiny ESM build
+      config.resolve.alias = {
+        ...(config.resolve.alias || {}),
+        '@supabase/supabase-js': '@supabase/supabase-js/dist/module/index.js',
+      }
     }
-    return config;
+    return config
   },
 };
 

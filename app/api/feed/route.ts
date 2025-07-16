@@ -12,6 +12,7 @@ import { NextResponse } from 'next/server'
  * 응답 형태 { total, items[] }
  */
 export async function GET(request: Request) {
+  // use the lightweight ESM build
   const { createClient } = await import('@supabase/supabase-js/dist/module/index.js')
   const supabase = createClient(
     process.env.SUPABASE_URL!,
