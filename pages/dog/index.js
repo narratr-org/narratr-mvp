@@ -2,7 +2,8 @@
 export const runtime = 'experimental-edge';
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import DatePicker from 'react-datepicker';
+// only load chart & datepicker on the client
+const DatePicker = dynamic(() => import('react-datepicker'), { ssr: false })
 import 'react-datepicker/dist/react-datepicker.css';
 import TagKolFilter from '../../components/TagKolFilter';
 import { TAGS } from '../../lib/tags';
