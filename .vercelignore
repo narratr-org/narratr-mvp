@@ -5,5 +5,4 @@ node_modules/
 **/*.d.ts
 **/*.map
 /next-env.d.ts
-/pages/api
-/pages/api/**
+pages/
