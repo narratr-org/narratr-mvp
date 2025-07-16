@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server'
  * 응답 형태 { total, items[] }
  */
 export async function GET(request: Request) {
-  const { createClient } = await import('@supabase/supabase-js')
+  const { createClient } = await import('@supabase/supabase-js/edge')
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!

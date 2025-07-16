@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 const INTERVALS = [1, 5, 15, 60];
 
 export async function GET(request: Request) {
-  const { createClient } = await import('@supabase/supabase-js');
+  const { createClient } = await import('@supabase/supabase-js/edge');
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!

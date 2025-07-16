@@ -2,7 +2,7 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { createClient } = await import('@supabase/supabase-js');
+  const { createClient } = await import('@supabase/supabase-js/edge');
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!
