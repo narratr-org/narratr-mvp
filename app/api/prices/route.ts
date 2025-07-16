@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { createClient } = await import('@supabase/supabase-js/edge');
+  const { createClient } = await import('@supabase/supabase-js/dist/module/index.js');
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!

@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 // Standalone output removed to reduce bundle size
 const nextConfig = {
-  webpack(config, { isServer }) {
+  webpack(config, { isServer, isEdgeRuntime }) {
     config.resolve.fallback = {
       fs: false,
       path: false,
@@ -20,6 +20,9 @@ const nextConfig = {
         'chart.js': 'commonjs chart.js',
         'react-chartjs-2': 'commonjs react-chartjs-2',
       });
+    }
+    if (isEdgeRuntime) {
+      config.externals = [...(config.externals || []), '@supabase/supabase-js'];
     }
     return config;
   },
