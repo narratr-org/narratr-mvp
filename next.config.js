@@ -14,7 +14,12 @@ const nextConfig = {
     };
     if (isServer) {
       config.externals = config.externals || {};
-      config.externals['@supabase/supabase-js'] = 'commonjs @supabase/supabase-js';
+      // Serverless Function 번들에서 제외할 대형 라이브러리들
+      Object.assign(config.externals, {
+        '@supabase/supabase-js': 'commonjs @supabase/supabase-js',
+        'chart.js': 'commonjs chart.js',
+        'react-chartjs-2': 'commonjs react-chartjs-2',
+      });
     }
     return config;
   },
