@@ -1,7 +1,14 @@
 {
+  // ensure heavy libs never get packaged into lambdas
   "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "@vercel/edge@1.0.0"
+    "api/**/*.ts": {
+      "runtime": "edge",
+      "externalModules": [
+        "@supabase/supabase-js",
+        "chart.js",
+        "react-chartjs-2",
+        "react-datepicker"
+      ]
     }
   }
 }
