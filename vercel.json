@@ -1,5 +1,5 @@
 {
-  // ensure heavy libs never get packaged into lambdas
+  "version": 2,
   "functions": {
     "api/**/*.ts": {
       "runtime": "edge",
