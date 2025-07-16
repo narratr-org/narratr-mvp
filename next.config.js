@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 // Standalone output removed to reduce bundle size
 const nextConfig = {
-  webpack(config) {
+  webpack(config, { isServer }) {
     config.resolve.fallback = {
       fs: false,
       path: false,
@@ -12,6 +12,10 @@ const nextConfig = {
       https: false,
       url: false,
     };
+    if (isServer) {
+      config.externals = config.externals || {};
+      config.externals['@supabase/supabase-js'] = 'commonjs @supabase/supabase-js';
+    }
     return config;
   },
 };
