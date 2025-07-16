@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
-// Standalone output removed to reduce bundle size
+// Enable standalone output so the server bundle includes only used files
 const nextConfig = {
+  output: 'standalone',
   webpack(config, { isServer, isEdgeRuntime }) {
     config.resolve.fallback = {
       fs: false,
