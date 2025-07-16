@@ -2,13 +2,7 @@
   "version": 2,
   "functions": {
     "api/**/*.ts": {
-      "runtime": "edge",
-      "externalModules": [
-        "@supabase/supabase-js",
-        "chart.js",
-        "react-chartjs-2",
-        "react-datepicker"
-      ]
+      "runtime": "edge"
     }
   }
 }
