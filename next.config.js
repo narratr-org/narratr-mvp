@@ -1,37 +1,17 @@
 /** @type {import('next').NextConfig} */
-// Enable standalone output so the server bundle includes only used files
 const nextConfig = {
+  // standalone 모드로 빌드해서 .next/standalone 에만 필요한 파일 남김
   output: 'standalone',
-  webpack(config, { isServer, isEdgeRuntime }) {
-    config.resolve.fallback = {
-      fs: false,
-      path: false,
-      net: false,
-      tls: false,
-      child_process: false,
-      http: false,
-      https: false,
-      url: false,
-    }
-    if (isEdgeRuntime) {
-      // don’t bundle full Supabase SDK
-      config.externals = [...(config.externals || []), '@supabase/supabase-js']
-      config.resolve.alias = {
-        ...(config.resolve.alias || {}),
-        '@supabase/supabase-js': '@supabase/supabase-js/dist/module/index.js',
-      }
-    }
-    // server-side (Node) bundles: exclude chart.js, react-chartjs-2, react-datepicker
+  webpack: (config, { isServer }) => {
     if (isServer) {
-      config.externals = [
-        ...(config.externals || []),
+      // 서버리스 함수 번들에서 제외할 무거운 라이브러리
+      config.externals.push(
+        '@supabase/supabase-js',
         'chart.js',
-        'react-chartjs-2',
-        'react-datepicker',
-      ]
+        'canvas'
+      );
     }
-    return config
+    return config;
   },
 };
-
 module.exports = nextConfig;
