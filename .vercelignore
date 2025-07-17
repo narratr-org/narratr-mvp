@@ -1,8 +1,4 @@
-# ────────────────
-# Vercel Ignore
-# ────────────────
-node_modules/
-**/*.d.ts
-**/*.map
-/next-env.d.ts
-pages/
+.next
+node_modules
+.vercel
+.env.local
