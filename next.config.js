@@ -1,15 +1,17 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1) 서버리스 함수 크기를 대폭 줄여 주는 스탠드얼론 모드
-  output: 'standalone',
-
-  // 2) 기존 별칭 설정 유지
-  webpack(config) {
-    config.resolve.alias['@'] = path.resolve(__dirname);
+  experimental: { appDir: true },
+  // 서버리스 번들에서 제외할 무거운 라이브러리들
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push(
+        'chart.js',
+        'canvas',
+        '@supabase/supabase-js'
+      );
+    }
     return config;
   },
 };
-
 module.exports = nextConfig;

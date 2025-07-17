@@ -1,18 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
-import fetch from 'node-fetch'; // Node 18+ 환경이면 생략해도 됨
-
-// 크론 스케줄: 매 5분마다 실행 (UTC 기준)
-export const config = {
-  schedule: '*/5 * * * *',
-};
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+import { NextResponse } from 'next/server';
 const INTERVALS = [1, 5, 15, 60];
 
-export default async function handler(request, context) {
+export async function GET(request: Request) {
+  // use the lightweight ESM build
+  const { createClient } = await import('@supabase/supabase-js/dist/module/index.js');
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  );
   console.log(`🚀 [CRON] Job started at ${new Date().toISOString()}`);
 
   try {
@@ -24,10 +21,10 @@ export default async function handler(request, context) {
       const res = await fetch(`https://api.kraken.com/0/public/OHLC?pair=${pair}&interval=${interval}`);
       const data = await res.json();
 
-      const key = Object.keys(data.result).find(k => k !== 'last');
+      const key = Object.keys(data.result).find(k => k !== 'last') as string;
       const ohlc = data.result[key];
 
-      const formatted = ohlc.map(([ts, , , , close]) => ({
+      const formatted = (ohlc as any[]).map(([ts, , , , close]) => ({
         ts: new Date(ts * 1000).toISOString(), // UTC ISO timestamp
         close: parseFloat(close),
         interval: interval.toString(),
@@ -35,7 +32,7 @@ export default async function handler(request, context) {
 
       const { error } = await supabase
         .from('price_candles')
-        .upsert(formatted, { onConflict: ['ts', 'interval'] });
+        .upsert(formatted as any, { onConflict: 'ts,interval' });
 
       if (error) {
         console.error(`❌ Supabase insert error (interval ${interval}):`, error.message);
@@ -46,10 +43,11 @@ export default async function handler(request, context) {
     }
 
     console.log('🎉 Cron job completed successfully');
-    return new Response(`✅ Success: Data fetched and inserted`, { status: 200 });
+    return NextResponse.json({ message: 'Success: Data fetched and inserted' });
 
   } catch (err) {
-    console.error("🔥 Cron job failed:", err.message);
-    return new Response(`❌ Error: ${err.message}`, { status: 500 });
+    const message = (err as Error).message;
+    console.error('🔥 Cron job failed:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

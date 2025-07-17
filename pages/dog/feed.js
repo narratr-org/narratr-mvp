@@ -1,3 +1,5 @@
+export const runtime = 'experimental-edge';
+
 const sampleFeed = [
   { id: 1, title: 'First Post', body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.' },
   { id: 2, title: 'Second Post', body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' },
