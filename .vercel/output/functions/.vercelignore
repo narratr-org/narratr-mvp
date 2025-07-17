@@ -1,0 +1,4 @@
+# ignore local build artifacts for Vercel
+.next/
+node_modules/
+.vercel/
