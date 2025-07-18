@@ -24,6 +24,8 @@ jobs:
         with:
           version: 8
           run_install: false        # ← 핵심: auto install OFF
+      - name: Check pnpm version
+        run: pnpm --version
 
       # 4) 의존성 설치 (lock 검사 해제)
       - name: Install deps

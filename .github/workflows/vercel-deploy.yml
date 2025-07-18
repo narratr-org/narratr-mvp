@@ -17,16 +17,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          package-manager: 'pnpm'
-          cache: 'pnpm'
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          run_install: false
+          cache: pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm@latest
+      - name: Check pnpm version
+        run: pnpm --version
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm run build
