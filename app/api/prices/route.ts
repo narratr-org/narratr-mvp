@@ -5,6 +5,12 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   // use the lightweight ESM build
   const { createClient } = await import('@supabase/supabase-js/dist/module/index.js');
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    return NextResponse.json(
+      { error: 'Missing SUPABASE_URL or SUPABASE_KEY' },
+      { status: 400 }
+    );
+  }
   const supabase = createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_KEY!
