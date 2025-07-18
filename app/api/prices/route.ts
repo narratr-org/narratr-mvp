@@ -5,15 +5,18 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   // use the lightweight ESM build
   const { createClient } = await import('@supabase/supabase-js/dist/module/index.js');
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_KEY;
+
+  if (!url || !key) {
     return NextResponse.json(
       { error: 'Missing SUPABASE_URL or SUPABASE_KEY' },
       { status: 400 }
     );
   }
   const supabase = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_KEY!
+    url!,
+    key!
   )
   try {
     // 최근 2개 캔들의 close 가격 조회
