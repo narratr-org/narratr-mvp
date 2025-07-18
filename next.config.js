@@ -1,20 +1,23 @@
-// 개발환경에서만 .env.local 로컬 env 변수 로드
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config({ path: '.env.local' });
-}
+// load local env 파일 (example은 깃에, 실제값은 .env.local 에)
+require('dotenv').config({ path: './.env.local' });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 기존 설정 이어서...
   experimental: {
     appDir: true,
+    runtime: 'edge',
   },
-  webpack: (config) => {
-    // Serverless 번들 크기 줄이기 위해 heavy libs 외부화
-    config.externals = [
-      '@supabase/supabase-js',
-      'chart.js',
-      'canvas'
-    ];
+  /** 외부 라이브러리들은 서버리스 번들에서 제외(external) **/
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [
+        ...(config.externals || []),
+        '@supabase/supabase-js',
+        'chart.js',
+        'canvas'
+      ];
+    }
     return config;
   },
 };
