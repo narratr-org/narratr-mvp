@@ -1,0 +1,28 @@
+name: CI / Vercel CLI Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  deploy_prod:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Vercel via CLI (prod only)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel --prod --token "$VERCEL_TOKEN" --confirm
