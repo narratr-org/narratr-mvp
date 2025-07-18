@@ -13,10 +13,12 @@ jobs:
       # 1) 코드 체크아웃
       - uses: actions/checkout@v4
 
-      # 2) Node 20 설치
+      # 2) Node 18 설치 및 pnpm 캐시
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
+          package-manager: 'pnpm'
+          cache: 'pnpm'
 
       # 3) pnpm 8 설치 (자동 설치 끔!)
       - uses: pnpm/action-setup@v2
