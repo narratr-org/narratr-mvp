@@ -19,7 +19,7 @@ jobs:
           node-version: 20
 
       # 3) pnpm 8 설치 (자동 설치 끔!)
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v2
         with:
           version: 8
           run_install: false        # ← 핵심: auto install OFF
