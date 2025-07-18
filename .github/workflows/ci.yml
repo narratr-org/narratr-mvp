@@ -17,8 +17,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          package-manager: 'pnpm'
-          cache: 'pnpm'
+          cache: pnpm
 
       # 3) pnpm 8 설치 (자동 설치 끔!)
       - uses: pnpm/action-setup@v2
