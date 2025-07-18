@@ -1,4 +1,6 @@
-import { supabase } from '../../lib/supabaseClient'
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/feed?page=1&limit=20&tag=BitcoinEco&kol=LeonidasNFT
@@ -9,14 +11,19 @@ import { supabase } from '../../lib/supabaseClient'
  *
  * 응답 형태 { total, items[] }
  */
-export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', ['GET'])
-    return res.status(405).json({ error: `Method ${req.method} Not Allowed` })
-  }
-
+export async function GET(request: Request) {
+  // use the lightweight ESM build
+  const { createClient } = await import('@supabase/supabase-js/dist/module/index.js')
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_KEY!
+  )
   try {
-    const { page = '1', limit = '20', tag, kol } = req.query
+    const { searchParams } = new URL(request.url)
+    const page = searchParams.get('page') || '1'
+    const limit = searchParams.get('limit') || '20'
+    const tag = searchParams.get('tag') || undefined
+    const kol = searchParams.get('kol') || undefined
 
     /* 1) page → offset 계산 */
     const pageNum  = Math.max(parseInt(page, 10), 1)
@@ -36,10 +43,10 @@ export default async function handler(req, res) {
 
     /* 4) 실행 */
     const { data, count, error } = await query
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    return res.status(200).json({ total: count, items: data })
+    return NextResponse.json({ total: count, items: data })
   } catch (err) {
-    return res.status(500).json({ error: 'Internal server error' })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

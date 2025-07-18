@@ -21,3 +21,7 @@ echo 'TWITTER_BEARER=...'   >> .env
 python ingest_worker.py          # 트윗 JSON 생성
 python summarizer.py             # 요약·키워드 확인
 
+
+## Deployment
+2025-07-14: API Routes migrated to Edge runtime to fix Vercel size limit.
+
