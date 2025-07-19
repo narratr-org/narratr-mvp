@@ -25,3 +25,9 @@ python summarizer.py             # 요약·키워드 확인
 ## Deployment
 2025-07-14: API Routes migrated to Edge runtime to fix Vercel size limit.
 
+### Running in production
+`pnpm start` now loads environment variables from `.env.local` or Vercel preview files
+(`.vercel/.env.preview.local`). Define either `SUPABASE_URL`/`SUPABASE_KEY` or
+`NEXT_PUBLIC_SUPABASE_URL`/`NEXT_PUBLIC_SUPABASE_KEY` so endpoints like
+`/api/prices` work correctly.
+
