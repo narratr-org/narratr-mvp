@@ -8,15 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # ————————————————
+      # Setup Node.js (v4) + install pnpm
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: pnpm
-      - name: Install pnpm
-        run: npm install -g pnpm@latest
-      - name: Check pnpm version
-        run: pnpm --version
+          check-latest: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # (remove any legacy `package-manager:` or manual npm install steps here)
+      # ————————————————
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build
